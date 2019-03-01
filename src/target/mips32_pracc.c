@@ -460,7 +460,7 @@ int mips32_pracc_read_u32(struct mips_ejtag *ejtag_info, uint32_t addr, uint32_t
 	pracc_queue_init(&ctx);
 
 	pracc_add(&ctx, 0, MIPS32_LUI(ctx.isa, 15, PRACC_UPPER_BASE_ADDR));	/* $15 = MIPS32_PRACC_BASE_ADDR */
-	pracc_add(&ctx, 0, MIPS32_LUI(ctx.isa, 8, UPPER16((addr + 0x8000)))); /* load  $8 with modified upper addr */
+	pracc_add(&ctx, 0, MIPS32_LUI(ctx.isa, 8, UPPER16(addr) | 0x8000)); /* load  $8 with modified upper addr */
 	pracc_add(&ctx, 0, MIPS32_LW(ctx.isa, 8, LOWER16(addr), 8));			/* lw $8, LOWER16(addr)($8) */
 	pracc_add(&ctx, MIPS32_PRACC_PARAM_OUT,
 				MIPS32_SW(ctx.isa, 8, PRACC_OUT_OFFSET, 15));	/* sw $8,PRACC_OUT_OFFSET($15) */
@@ -499,13 +499,13 @@ int mips32_pracc_read_mem(struct mips_ejtag *ejtag_info, uint32_t addr, int size
 		ctx.store_count = 0;
 
 		int this_round_count = (count > 256) ? 256 : count;
-		uint32_t last_upper_base_addr = UPPER16((addr + 0x8000));
+		uint32_t last_upper_base_addr = UPPER16(addr) | 0x8000;
 
 		pracc_add(&ctx, 0, MIPS32_LUI(ctx.isa, 15, PRACC_UPPER_BASE_ADDR)); /* $15 = MIPS32_PRACC_BASE_ADDR */
 		pracc_add(&ctx, 0, MIPS32_LUI(ctx.isa, 9, last_upper_base_addr));	/* upper memory addr to $9 */
 
 		for (int i = 0; i != this_round_count; i++) {			/* Main code loop */
-			uint32_t upper_base_addr = UPPER16((addr + 0x8000));
+			uint32_t upper_base_addr = UPPER16(addr) | 0x8000;
 			if (last_upper_base_addr != upper_base_addr) {	/* if needed, change upper addr in $9 */
 				pracc_add(&ctx, 0, MIPS32_LUI(ctx.isa, 9, upper_base_addr));
 				last_upper_base_addr = upper_base_addr;
@@ -674,12 +674,12 @@ static int mips32_pracc_synchronize_cache(struct mips_ejtag *ejtag_info,
 	ctx.store_count = 0;
 
 	int count = 0;
-	uint32_t last_upper_base_addr = UPPER16((start_addr + 0x8000));
+	uint32_t last_upper_base_addr = UPPER16(start_addr) | 0x8000;
 
 	pracc_add(&ctx, 0, MIPS32_LUI(ctx.isa, 15, last_upper_base_addr)); /* load upper memory base addr to $15 */
 
 	while (start_addr <= end_addr) {						/* main loop */
-		uint32_t upper_base_addr = UPPER16((start_addr + 0x8000));
+		uint32_t upper_base_addr = UPPER16(start_addr) | 0x8000;
 		if (last_upper_base_addr != upper_base_addr) {		/* if needed, change upper addr in $15 */
 			pracc_add(&ctx, 0, MIPS32_LUI(ctx.isa, 15, upper_base_addr));
 			last_upper_base_addr = upper_base_addr;
@@ -735,12 +735,12 @@ static int mips32_pracc_write_mem_generic(struct mips_ejtag *ejtag_info,
 		ctx.store_count = 0;
 
 		int this_round_count = (count > 128) ? 128 : count;
-		uint32_t last_upper_base_addr = UPPER16((addr + 0x8000));
+		uint32_t last_upper_base_addr = UPPER16(addr) | 0x8000;
 			      /* load $15 with memory base address */
 		pracc_add(&ctx, 0, MIPS32_LUI(ctx.isa, 15, last_upper_base_addr));
 
 		for (int i = 0; i != this_round_count; i++) {
-			uint32_t upper_base_addr = UPPER16((addr + 0x8000));
+			uint32_t upper_base_addr = UPPER16(addr) | 0x8000;
 			if (last_upper_base_addr != upper_base_addr) {	/* if needed, change upper address in $15*/
 				pracc_add(&ctx, 0, MIPS32_LUI(ctx.isa, 15, upper_base_addr));
 				last_upper_base_addr = upper_base_addr;
