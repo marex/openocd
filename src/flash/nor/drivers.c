@@ -66,6 +66,7 @@ extern struct flash_driver psoc5lp_flash;
 extern struct flash_driver psoc5lp_eeprom_flash;
 extern struct flash_driver psoc5lp_nvl_flash;
 extern struct flash_driver psoc6_flash;
+extern struct flash_driver rtl8196_flash;
 extern struct flash_driver sim3x_flash;
 extern struct flash_driver stellaris_flash;
 extern struct flash_driver stm32f1x_flash;
@@ -135,6 +136,7 @@ static struct flash_driver *flash_drivers[] = {
 	&psoc5lp_eeprom_flash,
 	&psoc5lp_nvl_flash,
 	&psoc6_flash,
+	&rtl8196_flash,
 	&sim3x_flash,
 	&stellaris_flash,
 	&stm32f1x_flash,
