@@ -462,6 +462,7 @@ int mips32_pracc_read_u32(struct mips_ejtag *ejtag_info, uint32_t addr, uint32_t
 	pracc_add(&ctx, 0, MIPS32_LUI(ctx.isa, 15, PRACC_UPPER_BASE_ADDR));	/* $15 = MIPS32_PRACC_BASE_ADDR */
 	pracc_add(&ctx, 0, MIPS32_LUI(ctx.isa, 8, UPPER16(addr) | 0x8000)); /* load  $8 with modified upper addr */
 	pracc_add(&ctx, 0, MIPS32_LW(ctx.isa, 8, LOWER16(addr), 8));			/* lw $8, LOWER16(addr)($8) */
+	pracc_add(&ctx, 0, MIPS32_NOP);					/* nop in delay slot */
 	pracc_add(&ctx, MIPS32_PRACC_PARAM_OUT,
 				MIPS32_SW(ctx.isa, 8, PRACC_OUT_OFFSET, 15));	/* sw $8,PRACC_OUT_OFFSET($15) */
 	pracc_add_li32(&ctx, 8, ejtag_info->reg8, 0);				/* restore $8 */
@@ -517,6 +518,7 @@ int mips32_pracc_read_mem(struct mips_ejtag *ejtag_info, uint32_t addr, int size
 				pracc_add(&ctx, 0, MIPS32_LHU(ctx.isa, 8, LOWER16(addr), 9));
 			else
 				pracc_add(&ctx, 0, MIPS32_LBU(ctx.isa, 8, LOWER16(addr), 9));
+			pracc_add(&ctx, 0, MIPS32_NOP);					/* nop in delay slot */
 
 			pracc_add(&ctx, MIPS32_PRACC_PARAM_OUT + i * 4,			/* store $8 at param out */
 					  MIPS32_SW(ctx.isa, 8, PRACC_OUT_OFFSET + i * 4, 15));
@@ -935,9 +937,10 @@ int mips32_pracc_fastdata_xfer(struct mips_ejtag *ejtag_info, struct working_are
 		MIPS32_LW(isa, 10, 0, 8),						/* end addr to t2 */
 					/* loop: */
 		write_t ? MIPS32_LW(isa, 11, 0, 8) : MIPS32_LW(isa, 11, 0, 9),	/* from xfer area : from memory */
+		MIPS32_NOP,					/* nop in delay slot */
 		write_t ? MIPS32_SW(isa, 11, 0, 9) : MIPS32_SW(isa, 11, 0, 8),	/* to memory      : to xfer area */
 
-		MIPS32_BNE(isa, 10, 9, NEG16(3 << isa)),			/* bne $t2,t1,loop */
+		MIPS32_BNE(isa, 10, 9, NEG16(4 << isa)),			/* bne $t2,t1,loop */
 		MIPS32_ADDI(isa, 9, 9, 4),					/* addi t1,t1,4 */
 
 		MIPS32_LW(isa, 8, MIPS32_FASTDATA_HANDLER_SIZE - 4, 15),
