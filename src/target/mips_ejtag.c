@@ -160,18 +160,18 @@ void mips_ejtag_drscan_8_out(struct mips_ejtag *ejtag_info, uint8_t data)
 	jtag_add_dr_scan(tap, 1, &field, TAP_IDLE);
 }
 
-/* Set (to enable) or clear (to disable stepping) the SSt bit (bit 8) in Cp0 Debug reg (reg 23, sel 0) */
+/* Set (to enable) or clear (to disable stepping) the SSt bit (bit 8) in Cp0 Debug reg (reg 16, sel 0) */
 int mips_ejtag_config_step(struct mips_ejtag *ejtag_info, int enable_step)
 {
 	struct pracc_queue_info ctx = {.ejtag_info = ejtag_info};
 	pracc_queue_init(&ctx);
 
-	pracc_add(&ctx, 0, MIPS32_MFC0(ctx.isa, 8, 23, 0));			/* move COP0 Debug to $8 */
+	pracc_add(&ctx, 0, MIPS32_MFC0(ctx.isa, 8, 16, 0));			/* move COP0 Debug to $8 */
 	pracc_add(&ctx, 0, MIPS32_ORI(ctx.isa, 8, 8, 0x0100));			/* set SSt bit in debug reg */
 	if (!enable_step)
 		pracc_add(&ctx, 0, MIPS32_XORI(ctx.isa, 8, 8, 0x0100));		/* clear SSt bit in debug reg */
 
-	pracc_add(&ctx, 0, MIPS32_MTC0(ctx.isa, 8, 23, 0));			/* move $8 to COP0 Debug */
+	pracc_add(&ctx, 0, MIPS32_MTC0(ctx.isa, 8, 16, 0));			/* move $8 to COP0 Debug */
 	pracc_add(&ctx, 0, MIPS32_LUI(ctx.isa, 8, UPPER16(ejtag_info->reg8)));	/* restore upper 16 bits  of $8 */
 	pracc_add(&ctx, 0, MIPS32_B(ctx.isa, NEG16((ctx.code_count + 1) << ctx.isa)));		/* jump to start */
 	pracc_add(&ctx, 0, MIPS32_ORI(ctx.isa, 8, 8, LOWER16(ejtag_info->reg8))); /* restore lower 16 bits of $8 */
