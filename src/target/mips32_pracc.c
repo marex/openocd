@@ -847,7 +847,7 @@ int mips32_pracc_write_regs(struct mips_ejtag *ejtag_info, uint32_t *regs)
 		MIPS32_MTHI(ctx.isa, 1),						/* move $1 to hi */
 		MIPS32_MTC0(ctx.isa, 1, 8, 0),					/* move $1 to badvaddr */
 		MIPS32_MTC0(ctx.isa, 1, 13, 0),					/* move $1 to cause*/
-		MIPS32_MTC0(ctx.isa, 1, 24, 0),					/* move $1 to depc (pc) */
+		MIPS32_MTC0(ctx.isa, 1, 17, 0),					/* move $1 to depc (pc) */
 	};
 
 	/* load registers 2 to 31 with li32, optimize */
@@ -882,7 +882,7 @@ int mips32_pracc_read_regs(struct mips_ejtag *ejtag_info, uint32_t *regs)
 		MIPS32_MFHI(ctx.isa, 8),						/* move hi to $8 */
 		MIPS32_MFC0(ctx.isa, 8, 8, 0),					/* move badvaddr to $8 */
 		MIPS32_MFC0(ctx.isa, 8, 13, 0),					/* move cause to $8 */
-		MIPS32_MFC0(ctx.isa, 8, 24, 0),					/* move depc (pc) to $8 */
+		MIPS32_MFC0(ctx.isa, 8, 17, 0),					/* move depc (pc) to $8 */
 	};
 
 	pracc_add(&ctx, 0, MIPS32_MTC0(ctx.isa, 1, 31, 0));				/* move $1 to COP0 DeSave */
